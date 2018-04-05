@@ -23,6 +23,7 @@ class WeChatMsgProcessor(object):
 
         self.msg_history = {}
         self.msg_history_idx = []
+        self.last_recall = 0
 
     def clean_db(self):
         """
@@ -176,7 +177,10 @@ class WeChatMsgProcessor(object):
         self.add_history_message(msg['raw_msg']['MsgId'], msg)
         uid = msg['raw_msg']['FromUserName']
         if msg['raw_msg']['MsgType'] == self.wechat.wx_conf['MSGTYPE_RECALLED']:
-            self.handle_recall_message(uid, u'某人', msg)
+            now = time.time()
+            if (now - self.last_recall) > 5:
+                self.last_recall = now
+                self.handle_recall_message(uid, u'某人', msg)
 
         return
         text = msg['text']
